@@ -3,14 +3,21 @@ from Computer import *
 from Gameboard import*
 
 class Game:
-    def __init__(self):
-        self.player1 = Human(mark = 'X')
-        self.player2 = Computer(mark = 'O')
+    def __init__(self, gameType, markPlayer1):
+        if gameType == 'CvP':
+            self.player1 = Human(mark = markPlayer1)
+            self.player2 = Computer( mark = 'O' if markPlayer1 == 'X' else 'X')
+        elif gameType == 'PvP':
+            self.player1 = Human(mark = markPlayer1)
+            self.player2 = Human(mark = 'O' if markPlayer1 == 'X' else 'X')
+        self.setCurrentPlayer()
+        self.gameboard = Gameboard()
+
+    def setCurrentPlayer(self):
         if self.player1.getMark() == 'X':
             self.currentPlayer = self.player1
         else:
             self.currentPlayer = self.player2
-        self.gameboard = Gameboard()
 
     def isGameOver(self):
         return (self.gameboard.isBoardFull() or self.gameboard.isWinner())
@@ -35,6 +42,9 @@ class Game:
 
     def isPlayerVsComputer(self):
         return isinstance(self.player2, Computer)
+
+    def isComputerCurrentPlayer(self):
+        return isinstance(self.currentPlayer, Computer)
 
     def getComputerMove(self):
         return self.player2.bestMove(self.gameboard.getBoard())

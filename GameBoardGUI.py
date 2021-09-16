@@ -5,21 +5,24 @@ from Game import *
 
 class GameBoardGUI(Game):
 
-    def __init__(self, master=None):
-        super().__init__()
+    def __init__(self, master=None, gameType='CvP', markPlayer1 = 'X'):
+        super().__init__(gameType, markPlayer1)
         self.master = master
         self.loadTextures()
         self.buildGameboard()
         self.buildTiles()
        
     def loadTextures(self):
-        self.emptyTileTexture = PhotoImage(file="Graphics\\emptyTile.png")
-        self.crossTexture = PhotoImage(file=texture.TEXTURE_PATH + texture.CROSS_TEXTURE_PATH)
-        self.circleTexture = PhotoImage(file=texture.TEXTURE_PATH + texture.CIRCLE_TEXTURE_PATH)
-        self.gameboardTexture = PhotoImage(file=texture.TEXTURE_PATH + texture.GAMEBOARD_TEXTURE_PATH)
+        self.emptyTileImg = PhotoImage(file=texture.EMPTY_TILE_TEXTURE_PATH)
+        self.crossImg = PhotoImage(file=texture.CROSS_TEXTURE_PATH)
+        self.circleImg = PhotoImage(file=texture.CIRCLE_TEXTURE_PATH)
+        self.gameboardImg = PhotoImage(file=texture.GAMEBOARD_TEXTURE_PATH)
+        self.frameImg = PhotoImage(file=texture.GAMEBOARD_FRAME_TEXTURE_PATH)
 
     def buildGameboard(self):
-        self.gameBoard = Label(master=self.master, bg="black", image=self.gameboardTexture)
+        self.frame = Label(master=self.master, bg=Constants.COLOR_BACKGROUND, image=self.frameImg)
+        self.frame.place(relx=0.5, rely=0.5, anchor='center')
+        self.gameBoard = Label(master=self.master, bg="black", image=self.gameboardImg)
         self.gameBoard.grid_anchor('center')
         self.gameBoard.place(relx=0.5, rely=0.5, anchor='center')
 
@@ -28,7 +31,7 @@ class GameBoardGUI(Game):
         self.tiles = [[0 for x in range(w)] for y in range(h)] 
         for i in range(w):
             for j in range(h):
-                self.tiles[i][j] = Button(master=self.gameBoard, bg="black", activebackground="black", text=' ', borderwidth=0, image=self.emptyTileTexture, height=262, width=262)
+                self.tiles[i][j] = Button(master=self.gameBoard, bg="black", activebackground="black", text=' ', borderwidth=0, image=self.emptyTileImg, height=262, width=262)
                 self.tiles[i][j]['command'] = lambda x=i, y=j: self.click(x,y)
                 self.tiles[i][j].grid(row=i, column=j)
                 if i == 1 and j == 1:
@@ -37,13 +40,12 @@ class GameBoardGUI(Game):
     def click(self, x, y):
         
         if self.tiles[x][y]["text"] == ' ':
-            self.playerMove(x, y)
-            self.computerMoveIfGameIsntOver()
+            self.playerMoveIfGameIsntOver(x, y)
            
         if self.isGameOver():
             self.disableAllTiles()
 
-    def playerMove(self, x, y):
+    def playerMoveIfGameIsntOver(self, x, y):
             markToPut = self.getMarkToPutAndSwitchCurrentPlayer()
             textureToPut = self.getTextureToPut(markToPut)
     
@@ -56,7 +58,7 @@ class GameBoardGUI(Game):
         if self.isGameOver():
             self.disableAllTiles()
         else:
-            if self.isPlayerVsComputer():
+            if self.isPlayerVsComputer() and self.isComputerCurrentPlayer():
                 move = self.getComputerMove()
                 markToPut = self.getMarkToPutAndSwitchCurrentPlayer()
                 textureToPut = self.getTextureToPut(markToPut)
@@ -68,9 +70,9 @@ class GameBoardGUI(Game):
 
     def getTextureToPut(self, mark):
         if mark == 'X':
-            return self.crossTexture
+            return self.crossImg
         if mark == 'O':
-            return self.circleTexture
+            return self.circleImg
     
     def changeTileTexture(self, tile, texture, mark):
         tile["image"] = texture
@@ -86,13 +88,29 @@ class GameBoardGUI(Game):
             for j in range(h):
                 self.disableTile(self.tiles[i][j])
     
+    def run(self):
+        while not self.isGameOver():
+            self.master.update_idletasks()
+            self.master.update()
+            self.computerMoveIfGameIsntOver()
+
+    def deactivate(self):
+        w, h = (3,3)
+        for i in range(w):
+            for j in range(h):
+                self.tiles[i][j].grid_forget()
+        
+        self.frame.destroy()
+        self.gameBoard.destroy()
+
 if __name__ == "__main__":
 
     root = Tk()
     root.geometry("1920x1080")
-    backgroundTexture = PhotoImage(file=texture.TEXTURE_PATH + texture.BACKGROUND_TEXTURE_PATH)
+    backgroundTexture = PhotoImage(file=texture.BACKGROUND_TEXTURE_PATH)
     background = Label(master=root, image=backgroundTexture).place(x=0,y=0)
-    frameTexture = PhotoImage(file=texture.TEXTURE_PATH + texture.GAMEBOARD_FRAME_TEXTURE_PATH)
+    frameTexture = PhotoImage(file=texture.GAMEBOARD_FRAME_TEXTURE_PATH)
     frame = Label(master=root, bg=Constants.COLOR_BACKGROUND, image=frameTexture).place(relx=0.5, rely=0.5, anchor='center')
     gameBoard = GameBoardGUI(root)
-    root.mainloop()
+    gameBoard.run()
+   
