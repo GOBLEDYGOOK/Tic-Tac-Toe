@@ -38,7 +38,6 @@ class Gameboard:
         if self.winner == ' ' and self.isBoardFull():
             self.winner = 'draw'
 
-        return self.winner
     
     def isBoardFull(self):
         w, h = (3, 3)
@@ -59,6 +58,17 @@ class Gameboard:
 
     def getBoard(self):
         return self.board
-    
+
+    def getWinner(self):
+        return self.winner
+
+    def reset(self):
+        self.board = [
+            [' ', ' ', ' '],
+            [' ', ' ', ' '],
+            [' ', ' ', ' ']
+        ]
+        self.winner = " "
+        
 if __name__ == "__main__":
     pass
